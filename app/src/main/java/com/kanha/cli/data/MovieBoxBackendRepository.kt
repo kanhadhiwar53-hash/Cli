@@ -8,13 +8,10 @@ import java.net.URL
 import java.net.URLEncoder
 
 /**
- * Adapter for an HTTPS backend that the app owner controls and is authorized to use.
- * The uploaded ZIP is a Cloudstream extension, not a standalone Android SDK; its
- * private token/signature logic is not copied into this native app.
- *
+ * Adapter for an HTTPS backend controlled by the app owner and authorized to use.
  * GET {baseUrl}/search?q=QUERY
- * Response: {"results":[{"id":"...","title":"...","type":"movie|tv",
- * "overview":"...","posterUrl":"...","releaseDate":"..."}]}
+ * Optional response fields: playbackUrl and embedUrl must be authorized URLs.
+ * No private provider signing/token logic is embedded in the APK.
  */
 class MovieBoxBackendRepository(
     private val baseUrl: String = BuildConfig.MOVIEBOX_BACKEND_URL
@@ -23,10 +20,11 @@ class MovieBoxBackendRepository(
     override fun search(query: String): MovieSearchResult {
         if (baseUrl.isBlank()) {
             return MovieSearchResult.Failure(
-                "Backend configure nahi hai. README ka MovieBox backend setup section follow karein."
+                "Backend configure nahi hai. README ka backend setup section follow karein."
             )
         }
-        if (!baseUrl.startsWith("https://")) {
+        val parsedBase = runCatching { URL(baseUrl) }.getOrNull()
+        if (parsedBase?.protocol != "https") {
             return MovieSearchResult.Failure("Backend URL HTTPS hona chahiye.")
         }
 
@@ -39,7 +37,6 @@ class MovieBoxBackendRepository(
                 readTimeout = 15000
                 setRequestProperty("Accept", "application/json")
             }
-
             try {
                 val code = connection.responseCode
                 val stream = if (code in 200..299) connection.inputStream else connection.errorStream
@@ -69,10 +66,10 @@ class MovieBoxBackendRepository(
                             MediaType.TV
                         } else MediaType.MOVIE,
                         overview = item.optString("overview"),
-                        posterUrl = item.optString("posterUrl")
-                            .takeIf { it.isNotBlank() && it != "null" },
-                        releaseDate = item.optString("releaseDate")
-                            .takeIf { it.isNotBlank() && it != "null" }
+                        posterUrl = item.optString("posterUrl").safeHttpsOrNull(),
+                        releaseDate = item.optString("releaseDate").takeIf { it.isNotBlank() && it != "null" },
+                        playbackUrl = item.optString("playbackUrl").safeHttpsOrNull(),
+                        embedUrl = item.optString("embedUrl").safeHttpsOrNull()
                     )
                 }
                 if (items.isEmpty()) MovieSearchResult.Failure("Koi result nahi mila.")
@@ -83,5 +80,11 @@ class MovieBoxBackendRepository(
         } catch (_: Exception) {
             MovieSearchResult.Failure("Search nahi ho saka. Network ya backend response check karein.")
         }
+    }
+
+    private fun String.safeHttpsOrNull(): String? {
+        if (isBlank() || this == "null") return null
+        return runCatching { URL(this) }.getOrNull()
+            ?.takeIf { it.protocol == "https" && it.host.isNotBlank() }?.toString()
     }
 }

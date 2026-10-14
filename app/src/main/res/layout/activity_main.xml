@@ -7,10 +7,9 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="24dp"
-        android:gravity="center_vertical">
+        android:padding="24dp">
 
         <TextView
             android:layout_width="match_parent"
@@ -50,15 +49,32 @@
             android:layout_marginTop="12dp"
             android:text="Search" />
 
+        <ProgressBar
+            android:id="@+id/loadingProgress"
+            style="?android:attr/progressBarStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="20dp"
+            android:visibility="gone" />
+
         <TextView
             android:id="@+id/statusText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="24dp"
-            android:text="Search screen ready. API connection abhi configure nahi hai."
+            android:text="Search screen ready. Authorized metadata API configure karna baaki hai."
             android:textColor="#D7DCE5"
             android:textSize="15sp"
             android:lineSpacingExtra="4dp" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:text="Next: connect a documented API that you are authorized to use. Keep API secrets on a backend, not inside the APK."
+            android:textColor="#87909E"
+            android:textSize="13sp" />
 
     </LinearLayout>
 </ScrollView>

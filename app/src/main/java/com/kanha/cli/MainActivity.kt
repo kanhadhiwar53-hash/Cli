@@ -2,30 +2,34 @@ package com.kanha.cli
 
 import android.app.Activity
 import android.os.Bundle
-import android.view.Gravity
-import android.widget.LinearLayout
+import android.view.inputmethod.InputMethodManager
+import android.content.Context
+import android.widget.Button
+import android.widget.EditText
 import android.widget.TextView
+import android.widget.Toast
 
 class MainActivity : Activity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
 
-        val root = LinearLayout(this).apply {
-            orientation = LinearLayout.VERTICAL
-            gravity = Gravity.CENTER
-            setPadding(32, 32, 32, 32)
+        val searchInput = findViewById<EditText>(R.id.searchInput)
+        val searchButton = findViewById<Button>(R.id.searchButton)
+        val statusText = findViewById<TextView>(R.id.statusText)
+
+        searchButton.setOnClickListener {
+            val query = searchInput.text.toString().trim()
+            if (query.isEmpty()) {
+                searchInput.error = "Movie ya series ka naam likhein"
+                return@setOnClickListener
+            }
+
+            (getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager)
+                ?.hideSoftInputFromWindow(searchInput.windowToken, 0)
+
+            statusText.text = "Search query ready: \"$query\"\n\nMetadata provider abhi connect nahi hai. Agla step: authorized API endpoint aur API key configure karna."
+            Toast.makeText(this, "Search UI working", Toast.LENGTH_SHORT).show()
         }
-        root.addView(TextView(this).apply {
-            text = "MovieBox Integration Starter"
-            textSize = 22f
-            gravity = Gravity.CENTER
-        })
-        root.addView(TextView(this).apply {
-            text = "Kotlin + XML-ready Android scaffold. API integration is not configured yet."
-            textSize = 16f
-            gravity = Gravity.CENTER
-            setPadding(0, 20, 0, 0)
-        })
-        setContentView(root)
     }
 }

@@ -20,7 +20,7 @@ class MovieBoxBackendRepository(
     private val baseUrl: String = BuildConfig.MOVIEBOX_BACKEND_URL
 ) : MovieMetadataRepository {
 
-    override suspend fun search(query: String): MovieSearchResult {
+    override fun search(query: String): MovieSearchResult {
         if (baseUrl.isBlank()) {
             return MovieSearchResult.Failure(
                 "Backend configure nahi hai. README ka MovieBox backend setup section follow karein."

@@ -1,9 +1,6 @@
 package com.kanha.cli.data
 
-/**
- * Normalized metadata model for movies and TV shows.
- * Map your authorized metadata provider's JSON response into this model.
- */
+/** Normalized metadata model for movies and TV shows. */
 data class MovieItem(
     val id: String,
     val title: String,
@@ -13,20 +10,14 @@ data class MovieItem(
     val releaseDate: String? = null
 )
 
-enum class MediaType {
-    MOVIE,
-    TV
-}
+enum class MediaType { MOVIE, TV }
 
 sealed interface MovieSearchResult {
     data class Success(val items: List<MovieItem>) : MovieSearchResult
     data class Failure(val message: String) : MovieSearchResult
 }
 
-/**
- * Implement this interface against an API you are authorized to use.
- * Keep provider secrets on a backend instead of hard-coding them in the APK.
- */
+/** Implement this against a provider/backend you are authorized to use. */
 interface MovieMetadataRepository {
-    suspend fun search(query: String): MovieSearchResult
+    fun search(query: String): MovieSearchResult
 }
